@@ -47,14 +47,15 @@ class Guerrero extends Personaje {
     public void atacar(Personaje atacado) {
         arma.atacar();
         if (atacado instanceof Mago) {
-            salud -= 3;
+            atacado.salud -= 3;
             atacado.defender();
         } else if (atacado instanceof Arquero) {
-            salud -= 2;
+            atacado.salud -= 2;
             atacado.defender();
         } else if (atacado instanceof Guerrero) {
             atacado.defender();
-            atacado.atacar(this);
+            salud -= 1;
+            //atacado.atacar(this); Logica que en un momento posterior implementare amas detalle
         }
         stamina--;
     }
@@ -65,7 +66,7 @@ class Guerrero extends Personaje {
     }
 
     public void recargar() {
-        arma.recargar();
+        arma.recargar(); // guerrero solo recarga su stamina
         this.stamina = 10;
     }
 
@@ -86,19 +87,22 @@ class Mago extends Personaje {
     public void lanzarHechizo() {
 // Usar mana para lanzar un hechizo , tiene un costo de 3 puntos de mana. Se defiende solo con su mana, sin nada de stamina
         this.mana -= 3;
+        System.out.println("El mago lanza el mana!");
+
     }
 
     @Override
-    public void atacar(Personaje atacado) { // usa el baculo manualmente para atacar
-        arma.atacar();
+    public void atacar(Personaje atacado) { // usa el baculo  para votar hechizos
+        lanzarHechizo();
         if (atacado instanceof Mago) {
             atacado.defender();
-            atacado.atacar(this);
+            salud -= 2;
+            //atacado.atacar(this);
         } else if (atacado instanceof Arquero) {
-            salud -= 3;
+            atacado.salud -= 4;
             atacado.defender();
         } else if (atacado instanceof Guerrero) {
-            salud -= 4;
+            atacado.salud -= 5;
             atacado.defender();
         }
     }
@@ -135,13 +139,15 @@ class Arquero extends Personaje {
             System.out.println("No hay mas flechas!");
         }
         if (atacado instanceof Mago) { // instance of me dice Si fue atacado por esa clase
-            atacado.defender();
+            atacado.defender(); // Gran parte de las veces los magos se protejen muy bien de los arqueros
+            atacado.salud -= 2;
             atacado.atacar(this);
         } else if (atacado instanceof Arquero) {
             atacado.defender();
-            atacado.atacar(this);
+            salud -= 2;
+            //atacado.atacar(this); 
         } else if (atacado instanceof Guerrero) {
-            salud -= 4;
+            atacado.salud -= 4;
             atacado.defender();
         }
         stamina--;
@@ -180,6 +186,7 @@ class Espada implements Arma {
 
     public void recargar() {
 // No se necesita recargar una espada
+        System.out.println("El guerrero a descansado y recupero su fuerza!");
     }
 
 }
@@ -187,19 +194,24 @@ class Espada implements Arma {
 class Baculo implements Arma {
 
     Random r;
+// Esto sera implementado a futuro: dos funciones para el baculo, pegar manualmente cuando no tiene mana, o lanzar hechizo cuando esta a full
 
     public void atacar() {
-        r = new Random(2-1);
+        r = new Random();
+
         if (r.nextInt() == 0) {
             System.out.println("El mago lanza el mana!");
         } else {
             System.out.println("El mago pego con su baculo!");
         }
+
     }
 
     public void recargar() {
 // No se necesita recargar un báculo
-    // Otra implementacion para el mana
+        // Otra implementacion para el mana
+        System.out.println("Mana del mago recargado");
+
     }
 }
 
@@ -211,10 +223,13 @@ class Arco implements Arma {
 
     public void recargar() {
 // No se necesita recargar un arco
+        System.out.println("Flechas del arquero recargadas!");
+
     }
 }
 
-public class Problema1 {
+public class Problema1 { // Segun el juego. Suponemos que siempre que un personaje ataque a otro de su mismo tipo. El atacado se defiende y pierde algun recurso. Sin embargo el atacante resulta herido, pues no puede herir a alguien con su propio truco jeje.
+    // El resto de logica funciona como: El guerrero hace mucho damage a un mago cuando lo ataca de frente, el mago hace mucho damage siempre que ataque a distancia, el arquero de momento es el que tiene mas desventajas. Lo siento :((( .
 
     public static void main(String[] args) {
         Guerrero guerrero = new Guerrero("Guerrero educado", 10);
@@ -225,7 +240,6 @@ public class Problema1 {
         guerrero.atacar(mago);
         System.out.println("Salud del mago despues de ser atacado por el guerrero: " + mago.obtenerSalud());
 
-        mago.lanzarHechizo();
         mago.atacar(guerrero);
         System.out.println("Salud del guerrero despues de ser atacado por el mago: " + guerrero.obtenerSalud());
 
@@ -235,9 +249,11 @@ public class Problema1 {
         guerrero.defender();
         guerrero.atacar(arquero);
         System.out.println("Salud del arquero despues de ser atacado por el guerrero: " + arquero.obtenerSalud());
-
+        System.out.println("------------");
+        System.out.println("!!! Ronda 2!!!");
         guerrero.recargar();
         mago.recargar();
         arquero.recargar();
+        System.out.println("FIN\n---------");
     }
 }
